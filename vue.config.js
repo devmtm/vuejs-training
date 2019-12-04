@@ -2,8 +2,8 @@ const webpack = require("webpack");
 
 module.exports = {
   runtimeCompiler: true,
-  // outputDir: 'public',
-  // publicPath: '',
+  outputDir: 'public',
+  publicPath: 'public',
   lintOnSave: false,
   chainWebpack: config => {
     config.optimization.delete('splitChunks')

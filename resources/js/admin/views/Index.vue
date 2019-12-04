@@ -102,7 +102,13 @@
                             </template>
 
                             <template v-slot:body>
-                                <resource-table :fields="fields" :resources="resources" :actions="actions">
+                                <resource-table
+                                        :fields="fields"
+                                        :resources="resources"
+                                        :actions="actions"
+                                        :resource-name="resourceName"
+                                        @order="orderByField"
+                                >
                                 </resource-table>
                             </template>
 
@@ -119,7 +125,13 @@
 
 <script>
 
+    import {InteractsWithQueryString} from "../mixins";
+
     export default {
+
+        mixins: [
+            InteractsWithQueryString
+        ],
         provide: function() {
             return {
                 count: this.count,
@@ -133,6 +145,11 @@
         },
         data: function () {
             return {
+                orderBy: '',
+                orderByDirection: '',
+                // search: '',
+
+
                 count: 10,
 
 
@@ -140,15 +157,30 @@
                     {
                         name: 'id',
                         label: 'Id',
+                        sortable: true
                     },
                     {
                         name: 'order_id',
                         label: 'Order Id',
+                        sortable: true
 
                     }
                 ],
 
-                resources: [
+                resources: [],
+
+                actions: [
+                    // {
+                    //     name: 'view',
+                    // },
+                ],
+
+            }
+        },
+
+        methods: {
+            getResources() {
+                this.resources = [
                     {
                         fields: [
                             {
@@ -165,16 +197,58 @@
                         ]
                     },
 
-                ],
+                ]
+            },
 
-                actions: [
-                    {
-                        name: 'view',
-                    },
-                ],
-
-            }
+            orderByField(field) {
+                // console.log(field)
+                var direction = this.currentOrderByDirection == 'asc' ? 'desc' : 'asc'
+                if (this.currentOrderBy != field.name) {
+                    direction = 'asc'
+                }
+                this.updateQueryString({
+                    [this.orderByParameter]: field.name,
+                    [this.orderByDirectionParameter]: direction,
+                })
+            },
         },
+
+        computed: {
+            currentOrderByDirection() {
+                return this.$route.query[this.orderByDirectionParameter] || 'desc'
+            },
+
+            orderByDirectionParameter() {
+                // console.log(this.resourceName)
+                return this.resourceName + '_direction'
+            },
+
+            currentOrderBy() {
+                return this.$route.query[this.orderByParameter] || ''
+            },
+
+            orderByParameter() {
+                return this.resourceName + '_order'
+            },
+
+            resourceRequestQueryString() {
+                return {
+                    search: this.currentSearch,
+                    orderBy: this.currentOrderBy,
+                    orderByDirection: this.currentOrderByDirection,
+                }
+            },
+
+            currentSearch() {
+                return this.$route.query[this.searchParameter] || ''
+            },
+            searchParameter() {
+                return this.resourceName + '_search'
+            },
+
+        },
+
+
     }
 
 
