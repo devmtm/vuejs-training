@@ -1,7 +1,7 @@
 <template>
 
     <div class="kt-portlet__head">
-        <slot>
+        <slot :title="title">
             <div class="kt-portlet__head kt-portlet__head--lg">
                 <div class="kt-portlet__head-label">
 			<span class="kt-portlet__head-icon">
@@ -92,7 +92,7 @@
             }
         },
         mounted() {
-            // this.count += 1
+            console.log(this.title)
         }
     }
 

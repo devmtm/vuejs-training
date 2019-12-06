@@ -1,8 +1,8 @@
 <template>
     <div class="kt-portlet">
 
-        <portlet-head>
-            <slot name="head" v-bind:title="title"></slot>
+        <portlet-head :title="title">
+            <slot name="head" :title="title"></slot>
         </portlet-head>
 
         <portlet-body>
@@ -26,6 +26,10 @@
                 default: 'Title'
             }
         },
+
+        mounted() {
+            console.log(this.title)
+        }
 
 
     }
