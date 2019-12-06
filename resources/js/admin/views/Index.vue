@@ -180,6 +180,7 @@
 
         methods: {
             getResources() {
+                // console.log('getResources')
                 this.resources = [
                     {
                         fields: [
@@ -201,7 +202,6 @@
             },
 
             orderByField(field) {
-                // console.log(field)
                 var direction = this.currentOrderByDirection == 'asc' ? 'desc' : 'asc'
                 if (this.currentOrderBy != field.name) {
                     direction = 'asc'
@@ -219,7 +219,6 @@
             },
 
             orderByDirectionParameter() {
-                // console.log(this.resourceName)
                 return this.resourceName + '_direction'
             },
 

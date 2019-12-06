@@ -61,7 +61,6 @@
 
         methods: {
             requestOrderByChange(field) {
-                // console.log('field', field)
                 this.$emit('order', field)
             },
         },

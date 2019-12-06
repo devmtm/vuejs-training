@@ -92,7 +92,7 @@
             }
         },
         mounted() {
-            console.log(this.title)
+
         }
     }
 
