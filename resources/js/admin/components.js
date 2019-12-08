@@ -9,6 +9,7 @@ import PortletBody from './components/PortletBody'
 import PortletFoot from './components/PortletFoot'
 import Table from "./components/Table";
 import TableRow from "./components/TableRow";
+import PaginationLinks from "./components/Pagination/PaginationLinks";
 
 Vue.component('layout', Layout)
 Vue.component('page', Page)
@@ -20,3 +21,4 @@ Vue.component('portlet-body', PortletBody)
 Vue.component('portlet-foot', PortletFoot)
 Vue.component('resource-table', Table)
 Vue.component('table_row', TableRow)
+Vue.component('pagination-links', PaginationLinks)

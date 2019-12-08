@@ -20,8 +20,6 @@
         methods: {
 
             handleClick() {
-
-
                 this.$emit('sort', {
                     key: this.uriKey,
                     direction: this.direction,

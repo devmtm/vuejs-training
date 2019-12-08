@@ -1,12 +1,9 @@
 <template>
-    <div class="kt-datatable kt-datatable--default kt-datatable--brand kt-datatable--loaded">
+
         <table class="kt-datatable__table">
             <slot name='table-header'>
                 <thead class="kt-datatable__head">
                     <tr class="kt-datatable__row">
-
-
-
                         <th v-for="field in fields" :key="field.name" class="kt-datatable__cell">
                             <sorting-icon
                                     @sort="requestOrderByChange(field)"
@@ -32,9 +29,6 @@
 
         </table>
 
-        <div class="kt-datatable__pager kt-datatable--paging-loaded"></div>
-
-    </div>
 
 </template>
 

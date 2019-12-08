@@ -102,14 +102,60 @@
                             </template>
 
                             <template v-slot:body>
-                                <resource-table
-                                        :fields="fields"
-                                        :resources="resources"
-                                        :actions="actions"
-                                        :resource-name="resourceName"
-                                        @order="orderByField"
-                                >
-                                </resource-table>
+
+                                <div class="kt-form kt-form--label-right kt-margin-t-20 kt-margin-b-10">
+                                    <div class="row align-items-center">
+                                        <div class="col-xl-8 order-2 order-xl-1">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-4 kt-margin-b-20-tablet-and-mobile">
+                                                    <div class="kt-input-icon kt-input-icon--left">
+                                                        <input v-model="search"
+                                                               type="text"
+                                                               class="form-control"
+                                                               placeholder="Search..."
+                                                               @keypress.enter="performSearch"
+                                                        >
+                                                        <span class="kt-input-icon__icon kt-input-icon__icon--left">
+                                                            <span><i class="la la-search"></i></span>
+						                                </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-4 order-1 order-xl-2 kt-align-right">
+                                            <a href="#" class="btn btn-default kt-hidden">
+                                                <i class="la la-cart-plus"></i> New Order
+                                            </a>
+                                            <div class="kt-separator kt-separator--border-dashed kt-separator--space-lg d-xl-none"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="kt-datatable kt-datatable--default kt-datatable--brand kt-datatable--loaded">
+                                    <resource-table
+                                            :fields="fields"
+                                            :resources="resources"
+                                            :actions="actions"
+                                            :resource-name="resourceName"
+                                            @order="orderByField"
+                                    >
+                                    </resource-table>
+
+                                    <component
+                                            :is="paginationComponent"
+                                            v-if="resources.length > 0"
+                                            @page="selectPage"
+                                            :pages="totalPages"
+                                            :page="currentPage"
+                                            :per-page="currentPerPage"
+                                            @per-page="updatePerPageChanged"
+                                            :per-page-options="perPageOptions"
+                                    >
+                                        <span v-if="resourceCountLabel">{{ resourceCountLabel }}</span>
+                                    </component>
+
+                                </div>
+
+
                             </template>
 
                         </portlet>
@@ -125,12 +171,14 @@
 
 <script>
 
-    import {InteractsWithQueryString} from "../mixins";
+    import {InteractsWithQueryString, Paginatable, PerPageable} from "../mixins";
 
     export default {
 
         mixins: [
-            InteractsWithQueryString
+            InteractsWithQueryString,
+            PerPageable,
+            Paginatable
         ],
         provide: function() {
             return {
@@ -147,7 +195,8 @@
             return {
                 orderBy: '',
                 orderByDirection: '',
-                // search: '',
+                search: '',
+                allMatchingResourceCount: 0,
 
 
                 count: 10,
@@ -180,7 +229,25 @@
 
         methods: {
             getResources() {
-                // console.log('getResources')
+
+                axios.get('/user?ID=12345')
+                    .then(function (response) {
+                        // handle success
+                        console.log(response);
+                    })
+                    .catch(function (error) {
+                        // handle error
+                        console.log(error);
+                    })
+                    .finally(function () {
+                        // always executed
+                    });
+
+
+                console.log('getResources')
+                console.log(this.resourceRequestQueryString)
+                this.allMatchingResourceCount = 634
+
                 this.resources = [
                     {
                         fields: [
@@ -198,6 +265,22 @@
                         ]
                     },
 
+                    {
+                        fields: [
+                            {
+                                name: 'id',
+                                value: 2,
+                            },
+                            {
+                                name: 'order_id',
+                                value: 'ddd',
+                                asHtml: false,
+                                // component: 'action-button',
+
+                            }
+                        ]
+                    }
+
                 ]
             },
 
@@ -210,6 +293,28 @@
                     [this.orderByParameter]: field.name,
                     [this.orderByDirectionParameter]: direction,
                 })
+            },
+
+            performSearch(event) {
+                if (event.which != 9) {
+                    this.updateQueryString({
+                        [this.searchParameter]: this.search,
+                    })
+                }
+
+            },
+
+            updatePerPageChanged(perPage) {
+                this.perPage = perPage
+                this.perPageChanged()
+            },
+
+            selectPage(page) {
+                this.updateQueryString({ [this.pageParameter]: page })
+            },
+
+            initializeSearchFromQueryString() {
+                this.search = this.currentSearch
             },
         },
 
@@ -235,6 +340,8 @@
                     search: this.currentSearch,
                     orderBy: this.currentOrderBy,
                     orderByDirection: this.currentOrderByDirection,
+                    perPage: this.currentPerPage,
+                    page: this.currentPage,
                 }
             },
 
@@ -244,6 +351,66 @@
             searchParameter() {
                 return this.resourceName + '_search'
             },
+
+            paginationComponent() {
+                return 'pagination-links'
+            },
+
+            totalPages() {
+                return Math.ceil(this.allMatchingResourceCount / this.currentPerPage)
+            },
+
+
+            perPageOptions() {
+                return [25, 50, 100]
+            },
+
+            resourceCountLabel() {
+                const first = this.perPage * (this.currentPage - 1)
+
+                return (
+                    this.resources.length &&
+                    `${first + 1}-${first + this.resources.length} of ${
+                        this.allMatchingResourceCount
+                    }`
+                )
+            },
+
+            perPageParameter() {
+                return this.resourceName + '_per_page'
+            },
+
+            pageParameter() {
+                return this.resourceName + '_page'
+            },
+
+
+        },
+
+        created() {
+
+            this.initializeSearchFromQueryString()
+
+
+            this.getResources()
+
+
+            this.$watch(
+
+                () => {
+                    return (
+                        this.resourceName +
+                        this.currentOrderBy +
+                        this.currentOrderByDirection +
+                        this.currentSearch +
+                        this.currentPerPage +
+                        this.currentPage
+                    )
+                },
+                () => {
+                    this.getResources()
+                }
+            )
 
         },
 

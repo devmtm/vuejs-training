@@ -3,6 +3,7 @@ import router from './router'
 // import './fields'
 import './components'
 import './fields'
+import './plugins'
 
 Vue.config.productionTip = false
 
