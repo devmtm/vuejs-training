@@ -10,6 +10,8 @@ import PortletFoot from './components/PortletFoot'
 import Table from "./components/Table";
 import TableRow from "./components/TableRow";
 import PaginationLinks from "./components/Pagination/PaginationLinks";
+import SelectFilter from "./components/Filters/SelectFilter";
+import TextFilter from "./components/Filters/TextFilter";
 
 Vue.component('layout', Layout)
 Vue.component('page', Page)
@@ -22,3 +24,5 @@ Vue.component('portlet-foot', PortletFoot)
 Vue.component('resource-table', Table)
 Vue.component('table_row', TableRow)
 Vue.component('pagination-links', PaginationLinks)
+Vue.component('select-filter', SelectFilter)
+Vue.component('text-filter', TextFilter)

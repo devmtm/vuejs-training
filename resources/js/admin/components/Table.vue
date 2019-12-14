@@ -24,7 +24,7 @@
                 </thead>
             </slot>
             <tbody class="kt-datatable__body">
-                <table_row v-for="resource in resources" :resource="resource" :actions="actions" :key="resource.name" class="kt-datatable__row" style="left: 0px;"></table_row>
+                <table_row v-for="resource in resources" :fields="fields" :resource="resource" :actions="actions" :key="resource.name" class="kt-datatable__row" style="left: 0px;"></table_row>
             </tbody>
 
         </table>

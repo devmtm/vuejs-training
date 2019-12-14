@@ -98,7 +98,15 @@
                         <portlet :title="resourceName">
 
                             <template v-slot:head="{ title }">
-                                <h3>{{ title }}</h3>
+                                <div class="kt-portlet__head-label">
+                                    <span class="kt-portlet__head-icon">
+                                        <i class="kt-font-brand flaticon2-line-chart"></i>
+                                    </span>
+                                    <h3 class="kt-portlet__head-title">
+                                        {{ title }}
+                                    </h3>
+                                </div>
+                                <h3></h3>
                             </template>
 
                             <template v-slot:body>
@@ -123,13 +131,26 @@
                                             </div>
                                         </div>
                                         <div class="col-xl-4 order-1 order-xl-2 kt-align-right">
-                                            <a href="#" class="btn btn-default kt-hidden">
-                                                <i class="la la-cart-plus"></i> New Order
+                                            <a href="#" class="btn btn-default">
+                                                <i class="la la-plus"></i> New Product
                                             </a>
                                             <div class="kt-separator kt-separator--border-dashed kt-separator--space-lg d-xl-none"></div>
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="kt-form kt-form--label-right kt-margin-t-20 kt-margin-b-10">
+                                    <div class="row align-items-center">
+                                        <component v-for="filter in filters" :is="filter.component" :filter="filter" @change="filterChanged">
+
+                                        </component>
+                                    </div>
+                                </div>
+
+
+
+
+
                                 <div class="kt-datatable kt-datatable--default kt-datatable--brand kt-datatable--loaded">
                                     <resource-table
                                             :fields="fields"
@@ -180,11 +201,7 @@
             PerPageable,
             Paginatable
         ],
-        provide: function() {
-            return {
-                count: this.count,
-            }
-        },
+
         props: {
             resourceName: {
                 type: String,
@@ -198,90 +215,94 @@
                 search: '',
                 allMatchingResourceCount: 0,
 
-
-                count: 10,
-
-
-                fields: [
-                    {
-                        name: 'id',
-                        label: 'Id',
-                        sortable: true
-                    },
-                    {
-                        name: 'order_id',
-                        label: 'Order Id',
-                        sortable: true
-
-                    }
-                ],
+                fields: [],
 
                 resources: [],
 
-                actions: [
-                    // {
-                    //     name: 'view',
-                    // },
-                ],
+                actions: [],
+
+                filters: [],
 
             }
         },
 
         methods: {
+
+            getFields() {
+
+                this.fields = [
+                    {
+                        name: 'id',
+                        label: 'Id',
+                        sortable: true,
+                        asHtml: false,
+                    },
+                    {
+                        name: 'order_id',
+                        label: 'Order Id',
+                        sortable: true,
+                        asHtml: false,
+                    }
+                ]
+
+            },
+
+            getFilters() {
+
+                this.filters = [
+                    {
+                        slug: 'product-status',
+                        name: 'Product Status',
+                        component: 'select-filter',
+                        currentValue: null,
+                        options: [
+                            { name: 'All', value: '' },
+                            { name: 'Pending', value: '0' },
+                            { name: 'Delivered', value: '1' },
+                            { name: 'Canceled', value: '2' },
+                        ],
+                    },
+                    {
+                        slug: 'product-status2',
+                        name: 'Product Status2',
+                        component: 'select-filter',
+                        currentValue: null,
+                        options: [
+                            { name: 'All', value: '' },
+                            { name: 'Pending', value: '0' },
+                            { name: 'Delivered', value: '1' },
+                            { name: 'Canceled', value: '2' },
+                        ],
+                    },
+                    {
+                        slug: 'product-title',
+                        name: 'Product Title',
+                        component: 'text-filter',
+                        currentValue: null,
+                        options: [],
+                    }
+                ]
+
+            },
+
             getResources() {
-
-                axios.get('/user?ID=12345')
-                    .then(function (response) {
-                        // handle success
-                        console.log(response);
-                    })
-                    .catch(function (error) {
-                        // handle error
-                        console.log(error);
-                    })
-                    .finally(function () {
-                        // always executed
-                    });
-
 
                 console.log('getResources')
                 console.log(this.resourceRequestQueryString)
+                console.log(this.currentFilters)
                 this.allMatchingResourceCount = 634
 
                 this.resources = [
                     {
-                        fields: [
-                            {
-                                name: 'id',
-                                value: 1,
-                            },
-                            {
-                                name: 'order_id',
-                                value: '<h1>fff</h1>',
-                                asHtml: true,
-                                // component: 'action-button',
-
-                            }
-                        ]
+                        id: 1,
+                        order_id: "gggg"
                     },
-
                     {
-                        fields: [
-                            {
-                                name: 'id',
-                                value: 2,
-                            },
-                            {
-                                name: 'order_id',
-                                value: 'ddd',
-                                asHtml: false,
-                                // component: 'action-button',
-
-                            }
-                        ]
+                       id: 2,
+                       order_id: 'yyyyy'
                     }
-
                 ]
+
             },
 
             orderByField(field) {
@@ -316,6 +337,37 @@
             initializeSearchFromQueryString() {
                 this.search = this.currentSearch
             },
+
+
+
+
+            filterChanged(filter) {
+                this.updateFilter(filter)
+                this.updateQueryString({
+                    [this.filterParameter]: this.currentEncodedFilters,
+                })
+            },
+
+            updateFilter(updatedFilter) {
+                // console.log('updatedFilter', updatedFilter)
+                // console.log('filters', this.filters)
+                const filter = _(this.filters).find(f => f.slug == updatedFilter.slug)
+
+                filter.currentValue = updatedFilter.value
+            },
+
+            initializeFiltersFromQueryString() {
+                if (this.initialEncodedFilters) {
+                    const initialFilters = JSON.parse(atob(this.initialEncodedFilters))
+                    _.each(initialFilters, f => {
+                        this.updateFilter({ slug: f.slug, value: f.value })
+                    })
+                }
+            },
+
+
+
+
         },
 
         computed: {
@@ -342,12 +394,31 @@
                     orderByDirection: this.currentOrderByDirection,
                     perPage: this.currentPerPage,
                     page: this.currentPage,
+                    filters: this.currentEncodedFilters,
                 }
             },
 
             currentSearch() {
                 return this.$route.query[this.searchParameter] || ''
             },
+
+            currentEncodedFilters() {
+                return btoa(JSON.stringify(this.currentFilters))
+            },
+
+            currentFilters() {
+                return _.map(this.filters, f => {
+                    return {
+                        slug: f.slug,
+                        value: f.currentValue,
+                    }
+                })
+            },
+
+            initialEncodedFilters() {
+                return this.$route.query[this.filterParameter] || ''
+            },
+
             searchParameter() {
                 return this.resourceName + '_search'
             },
@@ -384,12 +455,21 @@
                 return this.resourceName + '_page'
             },
 
-
+            filterParameter() {
+                return this.resourceName + '_filter'
+            },
         },
 
         created() {
 
             this.initializeSearchFromQueryString()
+
+
+            this.getFields()
+
+            this.getFilters()
+
+            this.initializeFiltersFromQueryString()
 
 
             this.getResources()
@@ -403,6 +483,7 @@
                         this.currentOrderBy +
                         this.currentOrderByDirection +
                         this.currentSearch +
+                        this.currentEncodedFilters +
                         this.currentPerPage +
                         this.currentPage
                     )
